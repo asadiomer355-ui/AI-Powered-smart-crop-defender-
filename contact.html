@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact | Smart-Crop Defender</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- AOS (Animate On Scroll) -->
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+  <!-- Google Fonts: Syne + DM Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Particles.js -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+  <style>
+    :root {
+      --green-deep: #0a3d1f;
+      --green-mid: #1a6b35;
+      --green-accent: #28a745;
+      --green-light: #6fcf87;
+      --gold: #d4a22a;
+      --cream: #f5f0e8;
+      --dark: #0d1f0f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark);
+      color: var(--cream);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Syne', sans-serif;
+    }
+
+    /* ─── PARTICLES ─── */
+    #particles-js {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ─── LAYOUT ─── */
+    .page-wrapper {
+      position: relative;
+      z-index: 2;
+      padding: 0 1rem;
+    }
+
+    /* ─── HERO HEADER ─── */
+    .hero {
+      min-height: 40vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 1rem 3rem;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(40, 167, 69, 0.15);
+      border: 1px solid rgba(40, 167, 69, 0.3);
+      border-radius: 999px;
+      padding: 6px 18px;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-badge span.dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green-accent);
+      animation: pulse-dot 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 7vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      text-align: center;
+      background: linear-gradient(135deg, #ffffff 0%, var(--green-light) 50%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: rgba(245, 240, 232, 0.6);
+      max-width: 500px;
+      text-align: center;
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    /* ─── LEAF DIVIDER ─── */
+    .leaf-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 2rem auto;
+      max-width: 200px;
+    }
+
+    .leaf-divider::before,
+    .leaf-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--green-accent));
+    }
+
+    .leaf-divider::after {
+      background: linear-gradient(270deg, transparent, var(--green-accent));
+    }
+
+    /* ─── SECTION CARD BASE ─── */
+    .glass-card {
+      background: rgba(10, 61, 31, 0.35);
+      border: 1px solid rgba(40, 167, 69, 0.18);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(40, 167, 69, 0.12);
+      border-color: rgba(40, 167, 69, 0.35);
+    }
+
+    /* ─── GUIDE SECTION ─── */
+    .guide-section {
+      max-width: 600px;
+      margin: 0 auto 4rem;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    .guide-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .guide-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .guide-role {
+      font-size: 0.9rem;
+      color: rgba(245,240,232,0.55);
+      margin-top: 4px;
+    }
+
+    /* ─── TEAM SECTION ─── */
+    .team-section {
+      max-width: 900px;
+      margin: 0 auto 4rem;
+      padding: 3rem 2rem;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 2rem;
+      text-align: center;
+      letter-spacing: -0.01em;
+    }
+
+    .section-title span {
+      color: var(--green-light);
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .team-card {
+      background: rgba(26, 107, 53, 0.15);
+      border: 1px solid rgba(111, 207, 135, 0.15);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    .team-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.08), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .team-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(111, 207, 135, 0.4);
+      box-shadow: 0 20px 50px rgba(40, 167, 69, 0.15), 0 0 0 1px rgba(111, 207, 135, 0.2);
+    }
+
+    .team-card:hover::before { opacity: 1; }
+
+    .team-avatar {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-accent));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 auto 1rem;
+      box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .team-card:hover .team-avatar {
+      box-shadow: 0 0 0 6px rgba(40, 167, 69, 0.35);
+    }
+
+    .team-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.03em;
+    }
+
+    .team-tag {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      opacity: 0.7;
+    }
+
+    /* ─── CONTACT FORM ─── */
+    .contact-section {
+      max-width: 700px;
+      margin: 0 auto 4rem;
+      padding: 3rem 2rem;
+    }
+
+    .form-field {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-field input,
+    .form-field textarea {
+      width: 100%;
+      background: rgba(10, 61, 31, 0.4);
+      border: 1px solid rgba(40, 167, 69, 0.2);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+      resize: none;
+    }
+
+    .form-field input::placeholder,
+    .form-field textarea::placeholder {
+      color: rgba(245,240,232,0.35);
+    }
+
+    .form-field input:focus,
+    .form-field textarea:focus {
+      border-color: var(--green-accent);
+      background: rgba(10, 61, 31, 0.65);
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.12), 0 0 20px rgba(40, 167, 69, 0.06);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
+
+    .send-btn {
+      width: 100%;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-accent));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .send-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(40, 167, 69, 0.35);
+    }
+
+    .send-btn:hover::before { opacity: 1; }
+
+    .send-btn:active { transform: translateY(0); }
+
+    .send-btn.sending {
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    /* ─── SUCCESS STATE ─── */
+    .success-msg {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+      border-radius: 16px;
+      background: rgba(40, 167, 69, 0.1);
+      border: 1px solid rgba(40, 167, 69, 0.3);
+      animation: fadeSlideUp 0.5s ease;
+    }
+
+    .success-msg.show { display: block; }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      border-top: 1px solid rgba(40, 167, 69, 0.12);
+      color: rgba(245,240,232,0.35);
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+    }
+
+    footer span { color: var(--green-light); }
+
+    /* ─── FLOATING LEAVES DECORATION ─── */
+    .floating-leaf {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1;
+      font-size: 1.5rem;
+      opacity: 0.07;
+      animation: floatLeaf linear infinite;
+    }
+
+    @keyframes floatLeaf {
+      0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.07; }
+      90% { opacity: 0.07; }
+      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ─── SCROLL PROGRESS ─── */
+    #scroll-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-accent), var(--gold));
+      z-index: 999;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    /* ─── NAV DOTS ─── */
+    .nav-dots {
+      position: fixed;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .nav-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(111, 207, 135, 0.25);
+      border: 1px solid rgba(111, 207, 135, 0.4);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-dot.active {
+      background: var(--green-accent);
+      transform: scale(1.3);
+      box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+    }
+
+    @media (max-width: 768px) { .nav-dots { display: none; } }
+
+    /* ─── GLOW ORBS ─── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 8s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(40, 167, 69, 0.12), transparent 70%);
+      top: -100px; left: -100px;
+    }
+
+    .orb-2 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(212, 162, 42, 0.08), transparent 70%);
+      bottom: 10%; right: -50px;
+      animation-delay: -4s;
+    }
+
+    @keyframes orbFloat {
+      from { transform: translate(0, 0); }
+      to { transform: translate(30px, 40px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Scroll Progress Bar -->
+  <div id="scroll-bar"></div>
+
+  <!-- Particles Background -->
+  <div id="particles-js"></div>
+
+  <!-- Glow Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- Nav Dots -->
+  <nav class="nav-dots" aria-label="Page sections">
+    <div class="nav-dot active" onclick="scrollToSection('hero')" title="Top"></div>
+    <div class="nav-dot" onclick="scrollToSection('guide')" title="Guide"></div>
+    <div class="nav-dot" onclick="scrollToSection('team')" title="Team"></div>
+    <div class="nav-dot" onclick="scrollToSection('contact')" title="Contact"></div>
+  </nav>
+
+  <div class="page-wrapper">
+
+    <!-- ─── HERO ─── -->
+    <header id="hero" class="hero">
+      <div class="hero-badge" data-aos="fade-down" data-aos-delay="100">
+        <span class="dot"></span> Agricultural Intelligence Platform
+      </div>
+      <h1 class="hero-title" data-aos="fade-up" data-aos-delay="200">
+        SMART-CROP<br>DEFENDER
+      </h1>
+      <p class="hero-sub" data-aos="fade-up" data-aos-delay="350">
+        Connecting Technology &amp; Agriculture for a Smarter, Greener Future
+      </p>
+      <div class="leaf-divider" data-aos="fade-up" data-aos-delay="450">🌿</div>
+    </header>
+
+    <!-- ─── GUIDE ─── -->
+    <section id="guide" class="glass-card guide-section" data-aos="fade-up" data-aos-delay="100">
+      <p class="guide-label">Project Mentor</p>
+      <div style="font-size:2.5rem; margin-bottom: 0.75rem;">🎓</div>
+      <p class="guide-name">Mr. Ramesh</p>
+      <p class="guide-role">Associate Professor, Department of CSE</p>
+    </section>
+
+    <!-- ─── TEAM ─── -->
+    <section id="team" class="glass-card team-section" data-aos="fade-up">
+      <h2 class="section-title">Meet the <span>Team</span></h2>
+      <div class="team-grid">
+
+        <div class="team-card" data-aos="zoom-in" data-aos-delay="100">
+          <div class="team-avatar">MA</div>
+          <p class="team-name">Mohammed Omer Asadi</p>
+          <span class="team-tag">Developer</span>
+        </div>
+
+        <div class="team-card" data-aos="zoom-in" data-aos-delay="220">
+          <div class="team-avatar">SS</div>
+          <p class="team-name">Syed Shoaib Ahmed</p>
+          <span class="team-tag">Developer</span>
+        </div>
+
+        <div class="team-card" data-aos="zoom-in" data-aos-delay="340">
+          <div class="team-avatar">HG</div>
+          <p class="team-name">Hamza Mohammed Ghouse</p>
+          <span class="team-tag">Developer</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ─── CONTACT FORM ─── -->
+    <section id="contact" class="glass-card contact-section" data-aos="fade-up">
+      <h2 class="section-title">Get in <span>Touch</span></h2>
+      <p style="text-align:center; color:rgba(245,240,232,0.5); margin-bottom:2rem; font-size:0.95rem;">
+        Have questions or collaboration ideas? We'd love to hear from you.
+      </p>
+
+      <div id="contact-form">
+        <div class="form-row">
+          <div class="form-field">
+            <input type="text" id="fname" placeholder="Your Name" autocomplete="off">
+          </div>
+          <div class="form-field">
+            <input type="email" id="femail" placeholder="Your Email" autocomplete="off">
+          </div>
+        </div>
+        <div class="form-field">
+          <input type="text" id="fsubject" placeholder="Subject" autocomplete="off">
+        </div>
+        <div class="form-field">
+          <textarea id="fmessage" rows="5" placeholder="Your Message…"></textarea>
+        </div>
+        <button class="send-btn" id="send-btn" onclick="handleSend()">
+          <span id="btn-text">Send Message ✦</span>
+        </button>
+      </div>
+
+      <div class="success-msg" id="success-msg">
+        <div style="font-size:2.5rem; margin-bottom:0.75rem;">🌱</div>
+        <h3 style="font-family:'Syne',sans-serif; font-size:1.3rem; color:#fff; margin-bottom:0.5rem;">Message Sent!</h3>
+        <p style="color:rgba(245,240,232,0.55); font-size:0.9rem;">Thanks for reaching out. We'll get back to you soon.</p>
+        <button onclick="resetForm()" style="margin-top:1.5rem; padding:0.6rem 1.5rem; background:rgba(40,167,69,0.2); border:1px solid rgba(40,167,69,0.3); border-radius:8px; color:var(--green-light); font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.3s;">
+          Send Another
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── FOOTER ─── -->
+    <footer data-aos="fade-up">
+      © 2024 <span>Smart-Crop Defender</span> Team — Powered by Innovation 🌱
+    </footer>
+
+  </div><!-- end .page-wrapper -->
+
+  <!-- AOS JS -->
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+  <script>
+    // ─── AOS INIT ───
+    AOS.init({ duration: 750, offset: 80, once: true, easing: 'ease-out-cubic' });
+
+    // ─── PARTICLES ───
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 45, density: { enable: true, value_area: 900 } },
+        color: { value: ['#28a745', '#6fcf87', '#d4a22a'] },
+        shape: { type: 'circle' },
+        opacity: { value: 0.35, random: true, anim: { enable: true, speed: 0.6, opacity_min: 0.05, sync: false } },
+        size: { value: 2.5, random: true, anim: { enable: true, speed: 1.5, size_min: 0.5, sync: false } },
+        line_linked: { enable: true, distance: 130, color: '#28a745', opacity: 0.08, width: 1 },
+        move: { enable: true, speed: 0.7, direction: 'none', random: true, straight: false, out_mode: 'out' }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' }, resize: true },
+        modes: { grab: { distance: 140, line_linked: { opacity: 0.2 } }, push: { particles_nb: 3 } }
+      },
+      retina_detect: true
+    });
+
+    // ─── SCROLL PROGRESS BAR ───
+    window.addEventListener('scroll', () => {
+      const scrolled = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+      document.getElementById('scroll-bar').style.width = scrolled + '%';
+
+      // Update nav dots
+      const sections = ['hero', 'guide', 'team', 'contact'];
+      const dots = document.querySelectorAll('.nav-dot');
+      let active = 0;
+      sections.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 200) active = i;
+      });
+      dots.forEach((d, i) => d.classList.toggle('active', i === active));
+    });
+
+    function scrollToSection(id) {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ─── FORM HANDLER ───
+    function handleSend() {
+      const name = document.getElementById('fname').value.trim();
+      const email = document.getElementById('femail').value.trim();
+      const msg = document.getElementById('fmessage').value.trim();
+
+      if (!name || !email || !msg) {
+        // Shake invalid fields
+        ['fname', 'femail', 'fmessage'].forEach(id => {
+          const el = document.getElementById(id);
+          if (!el.value.trim()) {
+            el.style.borderColor = '#e74c3c';
+            el.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.12)';
+            setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 2000);
+          }
+        });
+        return;
+      }
+
+      const btn = document.getElementById('send-btn');
+      const btnText = document.getElementById('btn-text');
+      btn.classList.add('sending');
+      btnText.textContent = 'Sending…';
+
+      setTimeout(() => {
+        document.getElementById('contact-form').style.display = 'none';
+        document.getElementById('success-msg').classList.add('show');
+      }, 1400);
+    }
+
+    function resetForm() {
+      document.getElementById('fname').value = '';
+      document.getElementById('femail').value = '';
+      document.getElementById('fsubject').value = '';
+      document.getElementById('fmessage').value = '';
+      document.getElementById('success-msg').classList.remove('show');
+      const form = document.getElementById('contact-form');
+      form.style.display = '';
+      const btn = document.getElementById('send-btn');
+      btn.classList.remove('sending');
+      document.getElementById('btn-text').textContent = 'Send Message ✦';
+    }
+
+    // ─── FLOATING LEAVES ───
+    const emojis = ['🌿', '🍃', '🌱'];
+    for (let i = 0; i < 6; i++) {
+      const leaf = document.createElement('div');
+      leaf.classList.add('floating-leaf');
+      leaf.textContent = emojis[i % emojis.length];
+      leaf.style.left = (10 + Math.random() * 80) + '%';
+      leaf.style.animationDuration = (18 + Math.random() * 14) + 's';
+      leaf.style.animationDelay = (-Math.random() * 20) + 's';
+      leaf.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+      document.body.appendChild(leaf);
+    }
+  </script>
+
+</body>
+</html>

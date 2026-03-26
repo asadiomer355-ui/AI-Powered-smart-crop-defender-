@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLANT DISEASE PREDICTION | IoT & ML Drone for Disease Control</title>
+
+  <!-- Google Fonts: Bebas Neue + Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Particles.js -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+  <style>
+    :root {
+      --green-deep:   #061a0a;
+      --green-dark:   #0b2e12;
+      --green-mid:    #1a6b35;
+      --green-accent: #2dcc5f;
+      --green-glow:   #4dff8a;
+      --gold:         #e8c14a;
+      --red-hot:      #ff3c3c;
+      --white:        #f0ffe8;
+      --muted:        rgba(240,255,232,0.45);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    html, body { width:100%; height:100%; overflow:hidden; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--green-deep);
+      color: var(--white);
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    #cursor {
+      position: fixed;
+      width: 12px; height: 12px;
+      background: var(--green-accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.08s ease, background 0.3s ease;
+      mix-blend-mode: screen;
+    }
+    #cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1.5px solid rgba(45,204,95,0.45);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.18s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+    }
+    body:has(a:hover) #cursor { background: var(--gold); transform: translate(-50%,-50%) scale(1.5); }
+    body:has(a:hover) #cursor-ring { width: 52px; height: 52px; border-color: rgba(232,193,74,0.5); }
+
+    /* ── NOISE GRAIN ── */
+    body::after {
+      content:'';
+      position: fixed; inset:0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── PARTICLES ── */
+    #particles-js {
+      position: fixed; inset:0;
+      z-index: 0;
+    }
+
+    /* ── ANIMATED GRID BACKGROUND ── */
+    .grid-bg {
+      position: fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(45,204,95,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(45,204,95,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridShift 20s linear infinite;
+      z-index: 0;
+    }
+    @keyframes gridShift {
+      0%   { background-position: 0 0; }
+      100% { background-position: 60px 60px; }
+    }
+
+    /* ── GLOWING ORBS ── */
+    .orb {
+      position: fixed; border-radius:50%;
+      filter: blur(100px); pointer-events:none; z-index:0;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(45,204,95,0.1), transparent 70%);
+      top: -150px; left: -100px;
+      animation: drift1 12s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(255,60,60,0.07), transparent 70%);
+      bottom: 0; right: 0;
+      animation: drift2 9s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 250px; height: 250px;
+      background: radial-gradient(circle, rgba(232,193,74,0.07), transparent 70%);
+      top: 50%; left: 50%;
+      animation: drift3 15s ease-in-out infinite alternate;
+    }
+    @keyframes drift1 { to { transform: translate(40px, 60px); } }
+    @keyframes drift2 { to { transform: translate(-50px, -40px); } }
+    @keyframes drift3 { to { transform: translate(30px, -50px); } }
+
+    /* ── MAIN WRAPPER ── */
+    .page {
+      position: relative; z-index: 2;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      padding: 0 6%;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 2rem 0 1.5rem;
+      border-bottom: 1px solid rgba(45,204,95,0.08);
+      animation: slideDown 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes slideDown {
+      from { opacity:0; transform:translateY(-24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .logo-block {
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    /* SVG logo placeholder (since we can't load Flask static) */
+    .logo-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-accent));
+      border-radius: 12px;
+      display: flex; align-items:center; justify-content:center;
+      font-size: 1.4rem;
+      box-shadow: 0 0 20px rgba(45,204,95,0.25);
+    }
+
+    .logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      line-height: 1.1;
+    }
+    .logo-text span { color: var(--green-accent); }
+
+    nav ul {
+      list-style: none;
+      display: flex; gap: 0.5rem;
+      align-items: center;
+    }
+
+    nav ul li a {
+      position: relative;
+      display: inline-block;
+      padding: 10px 24px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: rgba(240,255,232,0.65);
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    nav ul li a::before {
+      content: '';
+      position: absolute; inset:0;
+      background: rgba(45,204,95,0.07);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+    nav ul li a:hover {
+      color: var(--white);
+      border-color: rgba(45,204,95,0.2);
+    }
+    nav ul li a:hover::before { transform: scaleX(1); }
+
+    .nav-predict {
+      padding: 10px 28px !important;
+      background: linear-gradient(135deg, #b30014, #e8334a) !important;
+      border-color: transparent !important;
+      color: #fff !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 20px rgba(179,0,20,0.3);
+      transition: all 0.35s ease !important;
+    }
+    .nav-predict:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 30px rgba(255,60,60,0.4) !important;
+      color: #fff !important;
+    }
+    .nav-predict::before { display:none !important; }
+
+    /* ── HERO ── */
+    .hero {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      padding: 2rem 0 3rem;
+    }
+
+    /* LEFT CONTENT */
+    .hero-left {
+      flex: 1;
+      max-width: 680px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border: 1px solid rgba(45,204,95,0.3);
+      border-radius: 999px;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--green-accent);
+      margin-bottom: 2rem;
+      background: rgba(45,204,95,0.05);
+      opacity: 0;
+      animation: fadeUp 0.6s 0.3s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    .eyebrow .blink {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green-accent);
+      animation: blink 1.6s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4.5rem, 9vw, 8.5rem);
+      line-height: 0.93;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.8rem;
+    }
+
+    .title-line {
+      display: block;
+      opacity: 0;
+      clip-path: inset(0 100% 0 0);
+      animation: revealLine 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    .title-line:nth-child(1) { animation-delay: 0.5s; color: var(--white); }
+    .title-line:nth-child(2) {
+      animation-delay: 0.75s;
+      background: linear-gradient(90deg, var(--green-accent), var(--green-glow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @keyframes revealLine {
+      0%   { opacity:0; clip-path: inset(0 100% 0 0); }
+      1%   { opacity:1; }
+      100% { opacity:1; clip-path: inset(0 0% 0 0); }
+    }
+
+    .hero-desc {
+      font-size: clamp(1rem, 1.6vw, 1.25rem);
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 480px;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 1s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    .hero-desc strong { color: var(--green-accent); font-weight: 600; }
+
+    .hero-actions {
+      display: flex; gap: 1rem; align-items: center;
+      opacity: 0;
+      animation: fadeUp 0.7s 1.2s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+
+    .btn-primary {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 40px;
+      background: linear-gradient(135deg, #b30014, #e8334a);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 50px;
+      box-shadow: 0 6px 30px rgba(180,0,20,0.35), 0 0 0 0 rgba(255,60,60,0);
+      transition: all 0.35s cubic-bezier(0.22,1,0.36,1);
+      overflow: hidden;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute; inset:0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 12px 40px rgba(180,0,20,0.45), 0 0 0 6px rgba(255,60,60,0.08);
+    }
+    .btn-primary:hover::before { opacity:1; }
+
+    .btn-primary .arrow {
+      font-size: 1.1rem;
+      transition: transform 0.3s ease;
+    }
+    .btn-primary:hover .arrow { transform: translateX(4px); }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 16px 32px;
+      background: transparent;
+      color: rgba(240,255,232,0.7);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500;
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      border: 1px solid rgba(45,204,95,0.25);
+      border-radius: 50px;
+      transition: all 0.35s ease;
+    }
+    .btn-secondary:hover {
+      border-color: rgba(45,204,95,0.55);
+      color: var(--white);
+      background: rgba(45,204,95,0.06);
+      transform: translateY(-2px);
+    }
+
+    /* STATS ROW */
+    .stats {
+      display: flex; gap: 2.5rem; margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(45,204,95,0.1);
+      opacity: 0;
+      animation: fadeUp 0.7s 1.4s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    .stat-item { }
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      line-height: 1;
+      color: var(--white);
+    }
+    .stat-num span { color: var(--green-accent); }
+    .stat-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* RIGHT VISUAL */
+    .hero-right {
+      flex: 0 0 420px;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      animation: fadeLeft 0.9s 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+
+    @keyframes fadeLeft {
+      from { opacity:0; transform:translateX(40px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+
+    /* Hexagonal drone display */
+    .hex-frame {
+      position: relative;
+      width: 340px; height: 380px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .hex-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(45,204,95,0.15);
+      animation: spin linear infinite;
+    }
+    .hex-ring-1 { width:320px; height:320px; animation-duration:30s; }
+    .hex-ring-2 { width:260px; height:260px; animation-duration:20s; animation-direction:reverse; border-style:dashed; }
+    .hex-ring-3 { width:200px; height:200px; animation-duration:15s; border-color: rgba(232,193,74,0.12); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hex-center {
+      position: relative;
+      width: 150px; height: 150px;
+      background: linear-gradient(135deg, var(--green-dark), #0f3d1a);
+      border-radius: 50%;
+      display: flex; align-items:center; justify-content:center;
+      border: 2px solid rgba(45,204,95,0.3);
+      box-shadow:
+        0 0 0 8px rgba(45,204,95,0.05),
+        0 0 40px rgba(45,204,95,0.15),
+        inset 0 0 30px rgba(45,204,95,0.08);
+    }
+
+    .drone-emoji {
+      font-size: 4rem;
+      animation: hover-drone 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(45,204,95,0.5));
+    }
+    @keyframes hover-drone {
+      0%,100% { transform: translateY(0) rotate(-5deg); }
+      50%      { transform: translateY(-12px) rotate(5deg); }
+    }
+
+    /* Orbiting nodes */
+    .orbit-node {
+      position: absolute;
+      display: flex; align-items:center; justify-content:center;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(11,46,18,0.9);
+      border: 1px solid rgba(45,204,95,0.25);
+      font-size: 1.1rem;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      animation: orbitPulse 2.5s ease-in-out infinite alternate;
+    }
+    .orbit-node:nth-child(2) { top: 10px; left: 50%; transform:translateX(-50%); animation-delay:0s; }
+    .orbit-node:nth-child(3) { bottom: 10px; right: 20px; animation-delay:0.6s; }
+    .orbit-node:nth-child(4) { bottom: 10px; left: 20px; animation-delay:1.2s; }
+    .orbit-node:nth-child(5) { top: 50%; right: -10px; transform:translateY(-50%); animation-delay:0.9s; }
+    .orbit-node:nth-child(6) { top: 50%; left: -10px; transform:translateY(-50%); animation-delay:0.3s; }
+
+    @keyframes orbitPulse {
+      from { box-shadow: 0 4px 16px rgba(0,0,0,0.3); border-color: rgba(45,204,95,0.2); }
+      to   { box-shadow: 0 4px 24px rgba(45,204,95,0.2); border-color: rgba(45,204,95,0.5); }
+    }
+
+    /* Scan line */
+    .scan-line {
+      position: absolute;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green-accent), transparent);
+      opacity: 0.5;
+      animation: scan 4s ease-in-out infinite;
+      border-radius: 2px;
+    }
+    @keyframes scan {
+      0%   { top: 0%; opacity:0; }
+      5%   { opacity:0.6; }
+      95%  { opacity:0.6; }
+      100% { top: 100%; opacity:0; }
+    }
+
+    /* corner brackets on hex-frame */
+    .hex-frame::before, .hex-frame::after {
+      content:'';
+      position:absolute;
+      width:20px; height:20px;
+      border-color: rgba(45,204,95,0.35);
+      border-style:solid;
+    }
+    .hex-frame::before { top:0; left:0; border-width:2px 0 0 2px; }
+    .hex-frame::after  { bottom:0; right:0; border-width:0 2px 2px 0; }
+
+    /* Label tags on hex frame */
+    .hex-tag {
+      position: absolute;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-accent);
+      opacity: 0.7;
+      font-weight: 600;
+    }
+    .hex-tag-top    { top: -20px; left:50%; transform:translateX(-50%); }
+    .hex-tag-bottom { bottom: -20px; left:50%; transform:translateX(-50%); }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero { flex-direction: column; justify-content: center; text-align:center; }
+      .hero-right { display:none; }
+      .hero-desc, .hero-actions, .stats { margin-left:auto; margin-right:auto; }
+      .hero-actions { justify-content:center; }
+      .stats { justify-content:center; }
+      .eyebrow { margin-left:auto; margin-right:auto; }
+    }
+
+    @media (max-width: 600px) {
+      .page { padding: 0 4%; }
+      .hero-title { font-size: 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Grid Background -->
+  <div class="grid-bg"></div>
+
+  <!-- Glow Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Particles -->
+  <div id="particles-js"></div>
+
+  <!-- PAGE -->
+  <div class="page">
+
+    <!-- NAV -->
+    <nav>
+      <div class="logo-block">
+        <div class="logo-icon">🌿</div>
+        <div class="logo-text">PLANT-DISEASE<br><span>APP</span></div>
+      </div>
+      <ul>
+        <li><a href="{{ url_for('about') }}">About</a></li>
+        <li><a href="{{ url_for('contact') }}">Contact</a></li>
+        <li><a href="{{ url_for('predict') }}" class="nav-predict">⚡ Predict</a></li>
+      </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+
+      <!-- LEFT -->
+      <div class="hero-left">
+        <div class="eyebrow">
+          <span class="blink"></span>
+          IoT &amp; ML Powered Platform
+        </div>
+
+        <h1 class="hero-title">
+          <span class="title-line">PLANT</span>
+          <span class="title-line"> DISEASE APP</span>
+        </h1>
+
+        <p class="hero-desc">
+          AI-driven drone surveillance that detects, classifies, and neutralizes
+          <strong>plant diseases</strong> in real-time — before they spread.
+          Protecting harvests with precision agriculture.
+        </p>
+
+        <div class="hero-actions">
+          <a href="{{ url_for('predict') }}" class="btn-primary">
+            Run Prediction <span class="arrow">→</span>
+          </a>
+          <a href="{{ url_for('about') }}" class="btn-secondary">
+            Learn More
+          </a>
+        </div>
+
+        <div class="stats">
+          <div class="stat-item">
+            <div class="stat-num">38<span>+</span></div>
+            <div class="stat-label">Diseases Detected</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">97<span>%</span></div>
+            <div class="stat-label">Accuracy Rate</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">12<span>x</span></div>
+            <div class="stat-label">Faster than Manual</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT VISUAL -->
+      <div class="hero-right">
+        <div class="hex-frame">
+          <span class="hex-tag hex-tag-top">SYSTEM ACTIVE</span>
+          <span class="hex-tag hex-tag-bottom">v2.4.1 BUILD</span>
+
+          <div class="hex-ring hex-ring-1"></div>
+          <div class="hex-ring hex-ring-2"></div>
+          <div class="hex-ring hex-ring-3"></div>
+
+          <div class="scan-line"></div>
+
+          <div class="hex-center">
+            <span class="drone-emoji">🚁</span>
+          </div>
+
+          <!-- Orbiting feature nodes -->
+          <div class="orbit-node">📡</div>
+          <div class="orbit-node">🤖</div>
+          <div class="orbit-node">🌾</div>
+          <div class="orbit-node">🔬</div>
+          <div class="orbit-node">💊</div>
+        </div>
+      </div>
+
+    </section>
+  </div><!-- end .page -->
+
+  <script>
+    // ── CURSOR ──
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursor-ring');
+    let mx=0, my=0, rx=0, ry=0;
+
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+    function animateCursor() {
+      cursor.style.left = mx + 'px';
+      cursor.style.top  = my + 'px';
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // ── PARTICLES ──
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 55, density: { enable:true, value_area:1000 } },
+        color:  { value: ['#2dcc5f','#4dff8a','#e8c14a','#ffffff'] },
+        shape:  { type: 'circle' },
+        opacity: { value: 0.25, random:true, anim:{ enable:true, speed:0.5, opacity_min:0.03, sync:false } },
+        size:    { value: 2, random:true },
+        line_linked: { enable:true, distance:110, color:'#2dcc5f', opacity:0.06, width:1 },
+        move:    { enable:true, speed:0.5, random:true, out_mode:'out' }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events:    { onhover:{ enable:true, mode:'grab' }, onclick:{ enable:true, mode:'push' }, resize:true },
+        modes:     { grab:{ distance:160, line_linked:{ opacity:0.15 } }, push:{ particles_nb:2 } }
+      },
+      retina_detect: true
+    });
+
+    // ── TYPING GLITCH on SMART ──
+    const glitchChars = '!@#$%&*?<>█▒░';
+    const t1 = document.querySelector('.title-line:nth-child(1)');
+    const orig = 'SMART';
+
+    function glitch() {
+      let iter = 0;
+      const iv = setInterval(() => {
+        t1.textContent = orig.split('').map((c,i) => {
+          if(i < iter) return orig[i];
+          return glitchChars[Math.floor(Math.random()*glitchChars.length)];
+        }).join('');
+        iter++;
+        if(iter > orig.length) { clearInterval(iv); t1.textContent = orig; }
+      }, 60);
+    }
+
+    // Run glitch after reveal animation
+    setTimeout(glitch, 1800);
+    setInterval(glitch, 7000);
+  </script>
+
+</body>
+</html>
